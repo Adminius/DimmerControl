@@ -1,0 +1,50 @@
+#################################################
+# Syntax Coloring Map for DimmerControl Library #
+#################################################
+# Class
+###################################################################
+
+DimmerControl	KEYWORD1
+
+###################################################################
+# Methods and Functions
+###################################################################
+
+task	KEYWORD2
+setMinValue	KEYWORD2
+getMinValue	KEYWORD2
+setMaxValue	KEYWORD2
+getMaxValue	KEYWORD2
+setDurationAbsolute	KEYWORD2
+getDurationAbsolute	KEYWORD2
+setDurationRelative	KEYWORD2
+getDurationRelative	KEYWORD2
+setValueFunction	KEYWORD2
+setValueIdFunction	KEYWORD2
+taskStop	KEYWORD2
+taskOn	KEYWORD2
+taskOff	KEYWORD2
+taskToggleOnOff	KEYWORD2
+taskSoftOn	KEYWORD2
+taskSoftOff	KEYWORD2
+taskToggleSoftOnOff	KEYWORD2
+taskDimUp	KEYWORD2
+taskDimDown	KEYWORD2
+taskNewValue	KEYWORD2
+getCurrentValue	KEYWORD2
+updateAvailable	KEYWORD2
+resetUpdateFlag	KEYWORD2
+
+###################################################################
+# Constants
+###################################################################
+
+DIM_IDLE	LITERAL1
+DIM_STOP	LITERAL1
+DIM_ON	LITERAL1
+DIM_OFF	LITERAL1
+DIM_SOFTON	LITERAL1
+DIM_SOFTOFF	LITERAL1
+DIM_UP	LITERAL1
+DIM_DOWN	LITERAL1
+DIM_SET	LITERAL1
