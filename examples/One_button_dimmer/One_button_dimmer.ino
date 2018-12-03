@@ -5,6 +5,7 @@ DimmerControl led;
 //pin settings
 #define PIN_LED LED_BUILTIN
 #define PIN_BTN 2
+#define PIN_RELAIS 3
 
 //global variables
 bool boolButtonPressed = false;
@@ -13,6 +14,8 @@ bool dimDirection = true; //true: dim up, false: dim down
 byte debounceDuration = 80; //ms
 word longClickDuration = 400; //ms
 unsigned long lastMillis = 0;
+bool lastRelaisState = LOW;
+
 
 void taskButton(){
     unsigned long currentMillis = millis();
@@ -37,13 +40,7 @@ void taskButton(){
 
     //button is still pressed and it is a first long press detection
     if(boolButtonPressed && !duringLongClick && (currentMillis - lastMillis >= longClickDuration)){
-        if(dimDirection){
-            led.taskDimUp();
-            dimDirection = false;
-        }else{
-            led.taskDimDown();
-            dimDirection = true;
-        }
+        led.taskToggleDimUpDown();
         duringLongClick = true;
     }
 
@@ -59,29 +56,34 @@ void setValue(byte value){
 }
 
 void setup(){
-
     //Optional: set minimum possible value (default 0)
     //led.setMinValue(0);
     //Optional: set maximum possible value (default 255)
     //led.setMaxValue(255);
     //Optonal: how long should it if you turn on/off? (default 500ms)
-    //led.setDurationAbsolute(300); //milliseconds
+    //led.setDurationAbsolute(500); //milliseconds
     //Optonal: how long should it take if you dimming up/down (default 5000ms)
     //led.setDurationRelative(4000); //milliseconds
+    //start dimming up LED after power supply is realy on, it takes about 0.5 seconds
+    led.setPowerSupplyOnDelay(500); //milliseconds
+    //turn off power supply 60 seconds after LED was turned off.
+    led.setPowerSupplyOffDelay(60000); //milliseconds
     
     //Mandatory: set function that should be called to control output (
     led.setValueFunction(&setValue);
+    
     pinMode(PIN_BTN, INPUT);
+    pinMode(PIN_RELAIS, OUTPUT);
+    lastRelaisState = led.getPowerSupplyState();
+    digitalWrite(PIN_RELAIS, lastRelaisState);
 }
 
 void loop(){
     //task must be executed as often as posible
     led.task();
     taskButton();
-    if(led.updateAvailable()){
-        if(led.getCurrentValue() == led.getMinValue()) dimDirection = true;
-        if(led.getCurrentValue() == led.getMaxValue()) dimDirection = false;
-        //reset the update flag
-        led.resetUpdateFlag();
+    if(lastRelaisState != led.getPowerSupplyState()){
+        lastRelaisState = led.getPowerSupplyState();
+        digitalWrite(PIN_RELAIS, lastRelaisState);
     }
 }

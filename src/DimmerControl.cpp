@@ -8,14 +8,18 @@
 
 DimmerControl::DimmerControl(byte id){
     _id = id;
-    _updateAvailable = false;
     _valueMin = 0;
     _valueMax = 255;
     _valueNew = 0;
     _currentTask = DIM_IDLE;
     _updateCounter = 0;
     _updateAvailable = false;
+    _dimDirection = true;
     _busy = false;
+    _powerSupplyState = false;
+    _powerSupplyTask = PS_OFF;
+    _powerSupplyOnDelay = 0;
+    _powerSupplyOffDelay = 0;
     _durationAbsolute = 500;
     _durationRelative = 5000;
     _lastTaskExecution = 0;
@@ -24,14 +28,18 @@ DimmerControl::DimmerControl(byte id){
 
 DimmerControl::DimmerControl(){
     _id = 0;
-    _updateAvailable = false;
     _valueMin = 0;
     _valueMax = 255;
     _valueNew = 0;
     _currentTask = DIM_IDLE;
     _updateCounter = 0;
     _updateAvailable = false;
+    _dimDirection = true;
     _busy = false;
+    _powerSupplyState = false;
+    _powerSupplyTask = PS_OFF;
+    _powerSupplyOnDelay = 0;
+    _powerSupplyOffDelay = 0;
     _durationAbsolute = 500;
     _durationRelative = 5000;
     _lastTaskExecution = 0;
@@ -47,13 +55,28 @@ void DimmerControl::task(){
             _updateAvailable = true;
             _updateCounter = 0;
             _currentTask = DIM_IDLE;
+            if(_valueCurrent == 0 && _powerSupplyTask != PS_OFF_ONGOING && _powerSupplyTask != PS_OFF){
+                _powerSupplyTaskMillis = _currentMillis;
+                _powerSupplyTask = PS_OFF_ONGOING;
+            }
+            if(_valueCurrent == _valueMin)
+                _dimDirection = true;
+            if(_valueCurrent == _valueMax)
+                _dimDirection = false;
             break;
         //turn on immediately
         case DIM_ON:
             if(_valueCurrent != _valueMax){
-                _valueCurrent = _valueMax;
-                setValue(_valueCurrent);
-                _currentTask = DIM_STOP;
+                if(_powerSupplyTask == PS_ON){
+                    _valueCurrent = _valueMax;
+                    setValue(_valueCurrent);
+                    _currentTask = DIM_STOP;
+                }else{
+                    if(_powerSupplyTask != PS_ON_ONGOING){
+                        _powerSupplyTaskMillis = _currentMillis;
+                        _powerSupplyTask = PS_ON_ONGOING;
+                    }
+                }
             }
             break;
         //turn off immediately
@@ -67,14 +90,21 @@ void DimmerControl::task(){
         //smooth turn on
         case DIM_SOFTON:
             if(_valueCurrent < _valueMax){
-                if(!_busy){
-                    _delayAbsolute = (word)(_durationAbsolute / (_valueMax - _valueCurrent));
-                }
-                if(_currentMillis - _lastTaskExecution >= _delayAbsolute){
-                    _valueCurrent++;
-                    _busy = true;
-                    setValue(_valueCurrent);
-                    _lastTaskExecution = millis();
+                if(_powerSupplyTask == PS_ON){
+                    if(!_busy){
+                        _delayAbsolute = (word)(_durationAbsolute / (_valueMax - _valueCurrent));
+                    }
+                    if(_currentMillis - _lastTaskExecution >= _delayAbsolute){
+                        _valueCurrent++;
+                        _busy = true;
+                        setValue(_valueCurrent);
+                        _lastTaskExecution = millis();
+                    }
+                }else{
+                    if(_powerSupplyTask != PS_ON_ONGOING){
+                        _powerSupplyTaskMillis = _currentMillis;
+                        _powerSupplyTask = PS_ON_ONGOING;
+                    }
                 }
             }else{
                 _currentTask = DIM_STOP;
@@ -99,19 +129,26 @@ void DimmerControl::task(){
         //increase value
         case DIM_UP:
             if(_valueCurrent < _valueMax){
-                if(!_busy){
-                    _delayRelative = (word)(_durationRelative / (_valueMax - _valueCurrent));
-                }
-                if(_currentMillis - _lastTaskExecution >= _delayRelative){
-                    _valueCurrent++;
-                    _busy = true;
-                    _updateCounter++;
-                    if(_updateCounter >= _updateInterval){
-                        _updateAvailable  = true;
-                        _updateCounter = 0;
+                if(_powerSupplyTask == PS_ON){
+                    if(!_busy){
+                        _delayRelative = (word)(_durationRelative / (_valueMax - _valueCurrent));
                     }
-                    setValue(_valueCurrent);
-                    _lastTaskExecution = millis();
+                    if(_currentMillis - _lastTaskExecution >= _delayRelative){
+                        _valueCurrent++;
+                        _busy = true;
+                        _updateCounter++;
+                        if(_updateCounter >= _updateInterval){
+                            _updateAvailable  = true;
+                            _updateCounter = 0;
+                        }
+                        setValue(_valueCurrent);
+                        _lastTaskExecution = millis();
+                    }
+                }else{
+                    if(_powerSupplyTask != PS_ON_ONGOING){
+                        _powerSupplyTaskMillis = _currentMillis;
+                        _powerSupplyTask = PS_ON_ONGOING;
+                    }
                 }
             }else{
                 _currentTask = DIM_STOP;
@@ -141,14 +178,21 @@ void DimmerControl::task(){
         //set value
         case DIM_SET:
             if(_valueCurrent < _valueNew){
-                if(!_busy){
-                    _delayAbsolute = (word)(_durationAbsolute / (_valueNew - _valueCurrent));
-                }
-                if(_currentMillis - _lastTaskExecution >= _delayAbsolute){
-                    _valueCurrent++;
-                    _busy = true;
-                    setValue(_valueCurrent);
-                    _lastTaskExecution = millis();
+                if(_powerSupplyTask == PS_ON){
+                    if(!_busy){
+                        _delayAbsolute = (word)(_durationAbsolute / (_valueNew - _valueCurrent));
+                    }
+                    if(_currentMillis - _lastTaskExecution >= _delayAbsolute){
+                        _valueCurrent++;
+                        _busy = true;
+                        setValue(_valueCurrent);
+                        _lastTaskExecution = millis();
+                    }
+                }else{
+                    if(_powerSupplyTask != PS_ON_ONGOING){
+                        _powerSupplyTaskMillis = _currentMillis;
+                        _powerSupplyTask = PS_ON_ONGOING;
+                    }
                 }
             }else if(_valueCurrent > _valueNew){
                 if(!_busy){
@@ -165,6 +209,27 @@ void DimmerControl::task(){
             }
             break;
         case DIM_IDLE:
+        default:
+            break;
+    }
+
+    switch(_powerSupplyTask) {
+        case PS_ON_ONGOING:
+            if(_currentMillis - _powerSupplyTaskMillis >= _powerSupplyOnDelay){
+                _powerSupplyState = true;
+                _powerSupplyTask = PS_ON;
+            }
+            break;
+
+        case PS_OFF_ONGOING:
+            if(_currentMillis - _powerSupplyTaskMillis >= _powerSupplyOffDelay){
+                _powerSupplyState = false;
+                _powerSupplyTask = PS_OFF;
+            }
+            break;
+
+        case PS_ON:
+        case PS_OFF:
         default:
             break;
     }
@@ -267,6 +332,16 @@ void DimmerControl::taskDimDown(){
     _currentTask = DIM_DOWN;
 }
 
+void DimmerControl::taskToggleDimUpDown(){
+    if(_dimDirection){
+        _currentTask = DIM_UP;
+        _dimDirection = false;
+    }else{
+        _currentTask = DIM_DOWN;
+        _dimDirection = true;
+    }
+}
+
 void DimmerControl::taskNewValue(byte valueNew){
     _valueNew = valueNew;
     _currentTask = DIM_SET;
@@ -274,6 +349,18 @@ void DimmerControl::taskNewValue(byte valueNew){
 
 bool DimmerControl::isBusy(){
     return _busy;
+}
+
+bool DimmerControl::getPowerSupplyState(){
+    return _powerSupplyState;
+}
+
+void DimmerControl::setPowerSupplyOnDelay(word onDelay){
+    _powerSupplyOnDelay = onDelay;
+}
+
+void DimmerControl::setPowerSupplyOffDelay(unsigned long offDelay){
+    _powerSupplyOffDelay = offDelay;
 }
 
 byte DimmerControl::getCurrentValue(){

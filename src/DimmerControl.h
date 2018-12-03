@@ -19,6 +19,11 @@
 #define DIM_DOWN    7
 #define DIM_SET     8
 
+#define PS_OFF         0
+#define PS_OFF_ONGOING 1
+#define PS_ON          2
+#define PS_ON_ONGOING  3
+
 class DimmerControl
 {
 public:
@@ -36,6 +41,8 @@ public:
     void (*_setValueIdFunction)(byte,byte);
     void setValueFunction(void (*setValueFunction)(byte));
     void setValueIdFunction(void (*setValueIdFunction)(byte,byte));
+    void setPowerSupplyOnDelay(word onDelay);
+    void setPowerSupplyOffDelay(unsigned long offDelay);
 
     //control
     void taskStop();
@@ -47,10 +54,12 @@ public:
     void taskToggleSoftOnOff();
     void taskDimUp();
     void taskDimDown();
+    void taskToggleDimUpDown();
     void taskNewValue(byte valueNew);
 
     //information
     bool isBusy();
+    bool getPowerSupplyState();
     byte getCurrentValue();
     byte getMinValue();
     byte getMaxValue();
@@ -65,11 +74,17 @@ private:
     byte _valueMax;
     byte _valueNew;
     byte _valueCurrent;
+    bool _dimDirection;
     byte _currentTask;
     byte _updateCounter;
     byte _updateInterval;
     bool _updateAvailable;
     bool _busy;
+    bool _powerSupplyState;
+    byte _powerSupplyTask;
+    word _powerSupplyOnDelay;
+    unsigned long _powerSupplyOffDelay;
+    unsigned long _powerSupplyTaskMillis;
     int  _durationAbsolute;
     int  _durationRelative;
     word _delayAbsolute;

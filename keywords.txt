@@ -21,6 +21,9 @@ setDurationRelative	KEYWORD2
 getDurationRelative	KEYWORD2
 setValueFunction	KEYWORD2
 setValueIdFunction	KEYWORD2
+setPowerSupplyOnDelay	KEYWORD2
+setPowerSupplyOffDelay	KEYWORD2
+getPowerSupplyState	KEYWORD2
 taskStop	KEYWORD2
 taskOn	KEYWORD2
 taskOff	KEYWORD2
@@ -30,6 +33,7 @@ taskSoftOff	KEYWORD2
 taskToggleSoftOnOff	KEYWORD2
 taskDimUp	KEYWORD2
 taskDimDown	KEYWORD2
+taskToggleDimUpDown	KEYWORD2
 taskNewValue	KEYWORD2
 getCurrentValue	KEYWORD2
 updateAvailable	KEYWORD2
@@ -48,3 +52,7 @@ DIM_SOFTOFF	LITERAL1
 DIM_UP	LITERAL1
 DIM_DOWN	LITERAL1
 DIM_SET	LITERAL1
+PS_OFF	LITERAL1
+PS_OFF_ONGOING	LITERAL1
+PS_ON	LITERAL1
+PS_ON_ONGOING	LITERAL1
