@@ -24,6 +24,7 @@ setValueIdFunction	KEYWORD2
 setPowerSupplyOnDelay	KEYWORD2
 setPowerSupplyOffDelay	KEYWORD2
 getPowerSupplyState	KEYWORD2
+getPowerSupplyOnRequest	KEYWORD2
 taskStop	KEYWORD2
 taskOn	KEYWORD2
 taskOff	KEYWORD2

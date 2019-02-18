@@ -60,6 +60,7 @@ public:
     //information
     bool isBusy();
     bool getPowerSupplyState();
+    bool getPowerSupplyOnRequest();
     byte getCurrentValue();
     byte getMinValue();
     byte getMaxValue();

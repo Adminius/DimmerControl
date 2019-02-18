@@ -355,6 +355,14 @@ bool DimmerControl::getPowerSupplyState(){
     return _powerSupplyState;
 }
 
+bool DimmerControl::getPowerSupplyOnRequest(){
+    if (_powerSupplyTask == PS_ON_ONGOING || _powerSupplyTask == PS_ON){
+        return true;
+    }else{
+        return false;
+    }
+}
+
 void DimmerControl::setPowerSupplyOnDelay(word onDelay){
     _powerSupplyOnDelay = onDelay;
 }
