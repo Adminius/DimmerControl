@@ -101,9 +101,9 @@ void loop(){
                 break; 
         }
     }
-    //task must be executed as often as posible
+    //task must be executed as often as possible
     led1.task();
-    //if you want to inform user about current value it's better to check if it realy needed:
+    //if you want to inform user about current value it's better to check if it really needed:
     if(led1.updateAvailable()){
         Serial.print("Current value:" );
         //get the current value and print it

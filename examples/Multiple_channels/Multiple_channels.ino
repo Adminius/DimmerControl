@@ -39,11 +39,11 @@ void setup(){
 
 void loop(){
 
-    //task must be executed as often as posible
+    //task must be executed as often as possible
     for(byte ch = 0; ch < CHANNELS; ch++){
         channels[ch].task();
     }
-    //if you want to inform user about current value it's better to check if it realy needed:
+    //if you want to inform user about current value it's better to check if it really needed:
     for(byte ch = 0; ch < CHANNELS; ch++){
         if(channels[ch].updateAvailable()){
             channels[ch].resetUpdateFlag();
