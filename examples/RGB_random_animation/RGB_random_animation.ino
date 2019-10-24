@@ -1,6 +1,6 @@
 #include "DimmerControl.h"
 
-//create array of DimmerControls with unique IDs (ID repesents a pin number)
+//create array of DimmerControls with unique IDs (ID represents a pin number)
 DimmerControl channels[] = {
     DimmerControl(10), //red
     DimmerControl(11), //green
@@ -42,7 +42,7 @@ void loop(){
     unsigned long currentMillis = millis();
 
     for(byte ch = 0; ch < CHANNELS; ch++){
-        //task must be executed as often as posible
+        //task must be executed as often as possible
         channels[ch].task();
         if(currentMillis - lastMillis[ch] >= colorDelay[ch]){
             channels[ch].taskToggleSoftOnOff();

@@ -64,7 +64,7 @@ void setup(){
     //led.setDurationAbsolute(500); //milliseconds
     //Optonal: how long should it take if you dimming up/down (default 5000ms)
     //led.setDurationRelative(4000); //milliseconds
-    //start dimming up LED after power supply is realy on, it takes about 0.5 seconds
+    //start dimming up LED after power supply is really on, it takes about 0.5 seconds
     led.setPowerSupplyOnDelay(500); //milliseconds
     //turn off power supply 60 seconds after LED was turned off.
     led.setPowerSupplyOffDelay(60000); //milliseconds
@@ -79,7 +79,7 @@ void setup(){
 }
 
 void loop(){
-    //task must be executed as often as posible
+    //task must be executed as often as possible
     led.task();
     taskButton();
     if(lastRelaisState != led.getPowerSupplyState()){
